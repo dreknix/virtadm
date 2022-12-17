@@ -1,0 +1,21 @@
+---
+
+vm:
+  name: fedora37
+  desc: VM with Fedora 37
+
+  os: fedora35
+
+  hardware:
+    cpu: 2
+    memory: 4096
+
+  disk:
+    image: fedora37.img
+    size: 50
+    driver: virtio
+
+  # cdrom: Fedora-Workstation-Live-x86_64-37-1.7.iso
+  cdrom: Fedora-Server-dvd-x86_64-37-1.7.iso
+
+...
