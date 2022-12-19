@@ -131,15 +131,29 @@ fi
 echo "vm_name: $vm_name"
 echo "vm_desc: $vm_desc"
 
-echo "vm_disk_image: $vm_disk_image"
-echo "vm_disk_size: $vm_disk_size"
-echo "vm_disk_driver: $vm_disk_driver"
-
 vm_disk_image="${SCRIPT_BASE}/images/${vm_disk_image}"
+if [ -n "${cloudinit_image}" ] && [ ! -f "${vm_disk_image}" ]
+then
+  CI_IMAGE="${SCRIPT_BASE}/iso/${cloudinit_image##*/}"
+  if [ ! -f "${CI_IMAGE}" ]
+  then
+    curl -LO --output-dir "${SCRIPT_BASE}/iso" "${cloudinit_image}"
+  fi
+  if [ ! -f "${CI_IMAGE}" ]
+  then
+    __die "cloud-init image not found"
+  fi
+  qemu-img create \
+    -b "${CI_IMAGE}" -F qcow2 -f qcow2 \
+    "${vm_disk_image}" "${vm_disk_size}"G
+fi
+
 if [ ! -f "${vm_disk_image}" ]
 then
   __die "Image '${vm_disk_image}' is not readable"
 fi
+
+additional_args=""
 
 if [ -n "${vm_cdrom}" ]
 then
@@ -149,7 +163,15 @@ then
     __die "Image '${vm_cdrom}' is not readable"
   fi
   vm_cdrom="--location ${vm_cdrom}"
+else
+  additional_args="--boot hd"
 fi
+
+echo "vm_disk_image: $vm_disk_image"
+# only working with --location
+# --console pty,target_type=serial \
+# --extra-args 'console=ttyS0,115200n8 serial' \
+# --graphics vnc \
 
 # get list of os: virt-install --osinfo list
 virt-install \
@@ -159,11 +181,10 @@ virt-install \
   --ram=${vm_hardware_memory} \
   --vcpus=${vm_hardware_cpu} \
   --disk path="${vm_disk_image}",bus=${vm_disk_driver},size=${vm_disk_size} \
-  --graphics vnc,listen=127.0.0.1,port=5901 \
-  --console pty,target_type=serial \
-  --extra-args 'console=ttyS0,115200n8 serial' \
+  --nographics \
   ${vm_cdrom} \
-  --noautoconsole
+  ${additional_args} \
+#  --noautoconsole
 
 # VNC clients: vinagre, remmina
 

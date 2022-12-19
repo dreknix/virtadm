@@ -1,0 +1,21 @@
+---
+
+cloudinit:
+  image: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img
+
+vm:
+  name: ubuntu2204-server
+  desc: VM with Ubuntu 22.04 server (cloud-init)
+
+  os: ubuntu22.04
+
+  hardware:
+    cpu: 2
+    memory: 4096
+
+  disk:
+    image: ubuntu2204-server.qcow2
+    size: 50
+    driver: virtio
+
+...
