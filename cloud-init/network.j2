@@ -1,0 +1,20 @@
+network:
+  version: 2
+  ethernets:
+    eth0:
+      match:
+        name: enp*
+{%- if cloud_init_ip4_address %}
+      dhcp4: false
+      addresses:
+        - {{ cloud_init_ip4_address }}/24
+  {%- if cloud_init_ip4_gateway %}
+      gateway4: {{ cloud_init_ip4_gateway }}
+  {%- endif %}
+  {%- if cloud_init_nameservers %}
+      nameservers:
+        addresses: [{{ cloud_init_nameservers }}]
+  {%- endif  %}
+{%- else %}
+      dhcp4: true
+{%- endif %}

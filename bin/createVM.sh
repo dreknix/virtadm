@@ -148,13 +148,30 @@ then
     "${vm_disk_image}" "${vm_disk_size}"G
 fi
 
+cloud_init=""
+if [ -n "${cloudinit_image}" ]
+then
+  export cloud_init_hostname="${vm_hostname%%.*}"
+  export cloud_init_fqdn="${vm_hostname}"
+  export cloud_init_password="$(get-gopass.sh virtadm/defaultpw)"
+  export cloud_init_ip4_address="${cloudinit_ip4_address}"
+  export cloud_init_ip4_gateway="${cloudinit_ip4_gateway}"
+  export cloud_init_nameservers="${cloudinit_nameservers}"
+
+  mkdir -p "${SCRIPT_BASE}/cloud-init/${vm_name}/"
+  user_data="${SCRIPT_BASE}/cloud-init/${vm_name}/user-data.yaml"
+  network="${SCRIPT_BASE}/cloud-init/${vm_name}/network.yaml"
+  j2 "${SCRIPT_BASE}/cloud-init/user-data.j2" > "${user_data}"
+  j2 "${SCRIPT_BASE}/cloud-init/network.j2" > "${network}"
+  cloud_init="--cloud-init network-config=${network},user-data=${user_data}"
+fi
+
 if [ ! -f "${vm_disk_image}" ]
 then
   __die "Image '${vm_disk_image}' is not readable"
 fi
 
 additional_args=""
-
 if [ -n "${vm_cdrom}" ]
 then
   vm_cdrom="${SCRIPT_BASE}/iso/${vm_cdrom}"
@@ -181,10 +198,16 @@ virt-install \
   --ram=${vm_hardware_memory} \
   --vcpus=${vm_hardware_cpu} \
   --disk path="${vm_disk_image}",bus=${vm_disk_driver},size=${vm_disk_size} \
-  --nographics \
   ${vm_cdrom} \
+  ${cloud_init} \
+  --network=default,model=virtio \
+  --import \
+  --nographics \
   ${additional_args} \
 #  --noautoconsole
+
+#  --disk path="${vm_disk_image/server/server-cloudinit}",bus=${vm_disk_driver} \
+#  --disk path="${vm_disk_image/server.qcow2/server-cloudinit.iso}",device=cdrom \
 
 # VNC clients: vinagre, remmina
 

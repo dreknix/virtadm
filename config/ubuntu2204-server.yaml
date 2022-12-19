@@ -5,6 +5,7 @@ cloudinit:
 
 vm:
   name: ubuntu2204-server
+  hostname: ubuntu.example.org
   desc: VM with Ubuntu 22.04 server (cloud-init)
 
   os: ubuntu22.04

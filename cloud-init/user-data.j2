@@ -1,0 +1,27 @@
+#cloud-config
+hostname: {{ cloud_init_hostname }}
+fqdn: {{ cloud_init_fqdn }}
+manage_etc_hosts: true
+
+#package_upgrade: true
+
+timezone: Europe/Berlin
+
+ssh_import_id:
+  - lp:dreknix
+
+disable_root: false
+chpasswd:
+  expire: false
+  users:
+    - name: root
+      password: {{ cloud_init_password }}
+
+system_info:
+  default_user:
+    name: root
+
+runcmd:
+  - hostname -A
+  - cat /etc/hosts
+  - ip a l
