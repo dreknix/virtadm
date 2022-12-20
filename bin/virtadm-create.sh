@@ -105,7 +105,7 @@ function _virtadm_create() {
     fi
   fi
 
-  cloud_init=""
+  local virt_cloud_init_arg=""
   if [ -n "${cloudinit_image}" ]
   then
     export cloud_init_hostname="${vm_hostname%%.*}"
@@ -120,7 +120,15 @@ function _virtadm_create() {
     network="${SCRIPT_BASE}/cloud-init/${vm_name}/network.yaml"
     j2 "${SCRIPT_BASE}/cloud-init/user-data.j2" > "${user_data}"
     j2 "${SCRIPT_BASE}/cloud-init/network.j2" > "${network}"
-    cloud_init="--cloud-init network-config=${network},user-data=${user_data}"
+    #virt_cloud_init_arg="--cloud-init network-config=${network},user-data=${user_data}"
+    cloud-localds \
+      --disk-format raw \
+      --filesystem iso9660 \
+      --network-config "${network}" \
+      "${SCRIPT_BASE}/cloud-init/${vm_name}/cloud-init.iso" \
+      "${user_data}"
+
+    virt_cloud_init_arg="--disk path=${SCRIPT_BASE}/cloud-init/${vm_name}/cloud-init.iso,bus=virtio"
   fi
 
   if [ ! -f "${vm_disk_image}" ]
@@ -156,7 +164,7 @@ function _virtadm_create() {
     --vcpus=${vm_hardware_cpu} \
     --disk path="${vm_disk_image}",bus=${vm_disk_driver},size=${vm_disk_size} \
     ${vm_cdrom} \
-    ${cloud_init} \
+    ${virt_cloud_init_arg} \
     --network=default,model=virtio \
     --import \
     --nographics \
