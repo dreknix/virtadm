@@ -10,6 +10,8 @@ function _virtadm_help() {
   echo "COMMAND:"
   echo "   check          Check if QEMU/KVM is installed and configured"
   echo "   create         Create a new VM"
+  echo "   destroy        Shutdown and delete a VM"
+  echo "   ssh            Start a SSH session into VM"
   echo "   help           Show a list of commands"
   echo ""
   echo "GLOBAL OPTIONS:"
