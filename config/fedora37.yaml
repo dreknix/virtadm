@@ -11,7 +11,6 @@ vm:
     memory: 4096
 
   disk:
-    image: fedora37.img
     size: 50
     driver: virtio
 
