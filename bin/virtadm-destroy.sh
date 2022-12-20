@@ -35,4 +35,4 @@ function _virtadm_destroy() {
   echo "done"
 }
 
-export _virtadm_create
+export _virtadm_destroy

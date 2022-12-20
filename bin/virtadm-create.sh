@@ -2,10 +2,39 @@
 
 function _virtadm_create() {
 
-  if [ $# -ne 1 ]
-  then
-    __die "Missing argument 'config.yaml'"
-  fi
+  local virt_console_arg="--noautoconsole"
+
+  local LONG_OPTIONS=(
+    "console"
+  )
+
+  # read function arguments
+  opts=$(getopt \
+             --longoptions "$(printf "%s," "${LONG_OPTIONS[@]}")" \
+             --name "${progname}" \
+             --options "" \
+             -- "$@"
+        ) || __die "getopt failed"
+  eval set -- "$opts"
+
+  while [[ $# -gt 0 ]]
+  do
+    case "$1" in
+      --console)
+        virt_console_arg=""
+        shift
+        ;;
+
+      --)
+        shift
+        break
+        ;;
+      *)
+        __die "Option '${1}' was not expected"
+        break
+        ;;
+    esac
+  done
 
   yaml_file="$1"
 
@@ -132,7 +161,7 @@ function _virtadm_create() {
     --import \
     --nographics \
     ${additional_args} \
-    --noautoconsole
+    ${virt_console_arg}
 
   #  --disk path="${vm_disk_image/server/server-cloudinit}",bus=${vm_disk_driver} \
   #  --disk path="${vm_disk_image/server.qcow2/server-cloudinit.iso}",device=cdrom \
