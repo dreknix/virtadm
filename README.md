@@ -2,6 +2,10 @@
 
 Bash scripts for QEMU/KVM-based virtual machines.
 
+## General
+
+Existing VNC clients: vinagre, remmina
+
 ## Cloud-Init
 
 * [cloud-init documentation](https://cloudinit.readthedocs.io/en/latest/index.html)

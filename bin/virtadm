@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(dirname "$(readlink -es "${BASH_SOURCE[0]}")")"
+SCRIPT_BASE="$(cd "${SCRIPT_DIR}/.." && pwd)"
+progname=$(basename $0)
+
+function __die() {
+  tput setaf 9
+  echo "Error: $1" >&2
+  tput sgr0
+  exit 1
+}
+
+function __parse_yaml {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*'
+   local fs="$(echo @|tr @ '\034')"
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+
+subcommand="$1"
+
+case "${subcommand}" in
+    "" | "-h" | "--help")
+        help
+        ;;
+    *)
+        shift
+        if [ "${subcommand}" != "help" ] && [ "${subcommand}" != "check" ]
+        then
+          for c in virsh qemu-img kvm virt-install cloud-localds curl j2
+          do
+            if ! command -v $c &> /dev/null
+            then
+              __die "Command '$c' not found. Please run '${progname} check' for validation"
+            fi
+          done
+          if [ ! -w /var/run/libvirt/libvirt-sock ] || [ ! -w /dev/kvm ]
+          then
+              __die "Current user has no permissions. Please run '${progname} check' for validation"
+          fi
+        fi
+        if [ ! -f "${SCRIPT_DIR}/virtadm-${subcommand}.sh" ]
+        then
+          __die "'$subcommand' is not available"
+        fi
+        . "${SCRIPT_DIR}/virtadm-${subcommand}.sh"
+        _virtadm_${subcommand} $@
+        if [ $? = 127 ]; then
+            __die "'$subcommand' is not a known subcommand."
+        fi
+        ;;
+esac

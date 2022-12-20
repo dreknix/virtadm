@@ -15,7 +15,6 @@ vm:
     memory: 4096
 
   disk:
-    image: ubuntu2204-server.qcow2
     size: 50
     driver: virtio
 
