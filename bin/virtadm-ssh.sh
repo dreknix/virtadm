@@ -29,7 +29,12 @@ function _virtadm_ssh() {
   local mac_address
   local ip_address
   mac_address="$(virsh dumpxml "${virt_vm_name}" | grep "mac address" | awk -F\' '{ print $2 }')"
-  ip_address="$(arp -n | grep "${mac_address}" | cut -f 1 -d ' ')"
+  ip_address="$(arp -n | grep "${mac_address}" || true | cut -f 1 -d ' ')"
+
+  if [ -z "${ip_address}" ]
+  then
+    __die "VM '${virt_vm_name}' has no IP address"
+  fi
 
   ssh -o UserKnownHostsFile=/dev/null \
       -o StrictHostKeyChecking=no \
