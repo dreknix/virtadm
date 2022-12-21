@@ -16,6 +16,8 @@ set -o pipefail
 # Turn on traces, useful while debugging but commented out by default
 # set -o xtrace
 
+trap 'echo "Error: trap called in ${FUNCNAME-main context} line ${LINENO}."' ERR
+
 SCRIPT_DIR="$(dirname "$(readlink -es "${BASH_SOURCE[0]}")")"
 SCRIPT_BASE="$(cd "${SCRIPT_DIR}/.." && pwd)"
 export SCRIPT_BASE

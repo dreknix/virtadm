@@ -27,9 +27,9 @@ function _virtadm_destroy() {
   fi
 
   echo -n "Delete ${virt_vm_name}: "
-  virsh shutdown "${virt_vm_name}" &> /dev/null
+  virsh shutdown "${virt_vm_name}" &> /dev/null || true
   sleep 1
-  virsh destroy "${virt_vm_name}" &> /dev/null
+  virsh destroy "${virt_vm_name}" &> /dev/null || true
   virsh undefine "${virt_vm_name}" &> /dev/null
   rm -f "images/${virt_vm_name}.qcow2" &> /dev/null
   rm -rf "cloud-init/${virt_vm_name}/" &> /dev/null
