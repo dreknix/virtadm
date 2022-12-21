@@ -7,28 +7,28 @@ function _virtadm_ssh() {
     __die "Missing argument 'config.yaml'"
   fi
 
-  yaml_file="$1"
+  yaml_file="${1:?'First parameter is missing'}"
 
   if [ ! -f "${yaml_file}" ]
   then
     __die "Can not read config '${yaml_file}'"
   fi
 
-  eval "$(__parse_yaml "${yaml_file}")"
+  eval "$(__parse_yaml "${yaml_file}" "virt_")"
 
-  if [ -z "${vm_name}" ]
+  if [ -z "${virt_vm_name:-}" ]
   then
     __die "Value vm.name is not set in '${yaml_file}'"
   fi
 
-  if ! virsh dominfo "${vm_name}" &> /dev/null
+  if ! virsh dominfo "${virt_vm_name}" &> /dev/null
   then
-    __die "VM '${vm_name}' is not existent"
+    __die "VM '${virt_vm_name}' is not existent"
   fi
 
   local mac_address
   local ip_address
-  mac_address="$(virsh dumpxml "${vm_name}" | grep "mac address" | awk -F\' '{ print $2 }')"
+  mac_address="$(virsh dumpxml "${virt_vm_name}" | grep "mac address" | awk -F\' '{ print $2 }')"
   ip_address="$(arp -n | grep "${mac_address}" | cut -f 1 -d ' ')"
 
   ssh -o UserKnownHostsFile=/dev/null \
