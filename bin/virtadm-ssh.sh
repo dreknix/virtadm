@@ -28,8 +28,8 @@ function _virtadm_ssh() {
 
   local mac_address
   local ip_address
-  mac_address="$(virsh dumpxml "${virt_vm_name}" | grep "mac address" | awk -F\' '{ print $2 }')"
-  ip_address="$(arp -n | grep "${mac_address}" || true | cut -f 1 -d ' ')"
+  mac_address="$(virsh dumpxml "${virt_vm_name}" | grep "mac address" | awk -F"'" '{ print $2 }')"
+  ip_address="$(arp -n | grep "${mac_address}" | awk '{ print $1 }' || true)"
 
   if [ -z "${ip_address}" ]
   then
