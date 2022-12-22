@@ -94,6 +94,8 @@ function _virtadm_create() {
     if [ ! -f "${CI_IMAGE}" ]
     then
       curl -LO --output-dir "${SCRIPT_BASE}/iso" "${cloudinit_image}"
+    else
+      curl -z "${CI_IMAGE}" -LO --output-dir "${SCRIPT_BASE}/iso" "${cloudinit_image}"
     fi
     if [ ! -f "${CI_IMAGE}" ]
     then
@@ -134,8 +136,8 @@ function _virtadm_create() {
     mkdir -p "${SCRIPT_BASE}/cloud-init/${vm_name}/"
     user_data="${SCRIPT_BASE}/cloud-init/${vm_name}/user-data.yaml"
     network="${SCRIPT_BASE}/cloud-init/${vm_name}/network.yaml"
-    j2 "${SCRIPT_BASE}/cloud-init/user-data.j2" > "${user_data}"
-    j2 "${SCRIPT_BASE}/cloud-init/network.j2" > "${network}"
+    j2 "${SCRIPT_BASE}/cloud-init/${cloudinit_templates_config}" > "${user_data}"
+    j2 "${SCRIPT_BASE}/cloud-init/${cloudinit_templates_network}" > "${network}"
     # create cloud-init.iso
     local cloud_init_iso="${SCRIPT_BASE}/cloud-init/${vm_name}/cloud-init.iso"
     cloud-localds \
@@ -185,6 +187,8 @@ function _virtadm_create() {
     if [ ! -f "${virtio_driver_iso}" ]
     then
       curl -LO --output-dir "${SCRIPT_BASE}/iso" "${virtio_url}"
+    else
+      curl -z "${virtio_driver_iso}" -LO --output-dir "${SCRIPT_BASE}/iso" "${virtio_url}"
     fi
     virt_misc_args+=("--disk" "path=${SCRIPT_BASE}/iso/virtio-win.iso,device=cdrom")
 
