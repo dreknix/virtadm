@@ -200,7 +200,7 @@ function _virtadm_create() {
       unset unattend_password
       # create ISO - remove if already existing
       rm -f "${unattend_iso}"
-      mkisofs -o "${unattend_iso}" -input-charset utf-8 -J -r "${unattend_dir}"
+      mkisofs -o "${unattend_iso}" -input-charset utf-8 -J -r "${unattend_dir}" &> /dev/null
       rm -rf "${unattend_dir}"
       # add ISO to VM
       additional_args+=("--disk" "path=${unattend_iso},device=cdrom")
