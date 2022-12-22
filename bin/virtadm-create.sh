@@ -120,10 +120,10 @@ function _virtadm_create() {
 
     export cloud_init_hostname="${vm_hostname%%.*}"
     export cloud_init_fqdn="${vm_hostname}"
-    export cloud_init_password="$(get-gopass.sh virtadm/defaultpw)"
-    export cloud_init_ip4_address="${cloudinit_ip4_address}"
-    export cloud_init_ip4_gateway="${cloudinit_ip4_gateway}"
-    export cloud_init_nameservers="${cloudinit_nameservers}"
+    export cloud_init_password="$(mkpasswd --method=SHA-512 "$(get-gopass.sh virtadm/defaultpw)")"
+    export cloud_init_ip4_address="${cloudinit_ip4_address:-}"
+    export cloud_init_ip4_gateway="${cloudinit_ip4_gateway:-}"
+    export cloud_init_nameservers="${cloudinit_nameservers:-}"
 
     mkdir -p "${SCRIPT_BASE}/cloud-init/${vm_name}/"
     user_data="${SCRIPT_BASE}/cloud-init/${vm_name}/user-data.yaml"
@@ -146,7 +146,7 @@ function _virtadm_create() {
     __die "Image '${vm_disk_image}' is not readable"
   fi
 
-  if [ -n "${vm_cdrom}" ]
+  if [ -n "${vm_cdrom:-}" ]
   then
     vm_cdrom="${SCRIPT_BASE}/iso/${vm_cdrom}"
     if [ ! -f "${vm_cdrom}" ]
@@ -155,6 +155,7 @@ function _virtadm_create() {
     fi
     vm_cdrom="--cdrom ${vm_cdrom}"
   else
+    vm_cdrom=""
     additional_args+=("--boot" "hd")
   fi
 
