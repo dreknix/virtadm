@@ -13,6 +13,7 @@ function _virtadm_help() {
   echo "   connect        Connect to running VM"
   echo "   create         Create a new VM"
   echo "   destroy        Shutdown and delete a VM"
+  echo "   list           List all VMs"
   echo "   ssh            Start a SSH session into VM"
   echo "   help           Show a list of commands"
   echo ""
