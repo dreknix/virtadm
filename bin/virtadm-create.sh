@@ -2,7 +2,7 @@
 
 function _virtadm_create() {
 
-  local virt_console_arg="--noautoconsole"
+  local virt_console_arg=("--noautoconsole")
 
   local LONG_OPTIONS=(
     "console"
@@ -11,7 +11,7 @@ function _virtadm_create() {
   # read function arguments
   opts=$(getopt \
              --longoptions "$(printf "%s," "${LONG_OPTIONS[@]}")" \
-             --name "${progname}" \
+             --name "${progname:-}" \
              --options "" \
              -- "$@"
         ) || __die "getopt failed"
@@ -21,7 +21,7 @@ function _virtadm_create() {
   do
     case "$1" in
       --console)
-        virt_console_arg=""
+        virt_console_arg=()
         shift
         ;;
 
@@ -45,7 +45,7 @@ function _virtadm_create() {
 
   eval "$(__parse_yaml "${yaml_file}")"
 
-  if [ -z "${vm_name}" ]
+  if [ -z "${vm_name:-}" ]
   then
     __die "Value vm.name is not set in '${yaml_file}'"
   fi
@@ -55,22 +55,27 @@ function _virtadm_create() {
     __die "VM '${vm_name}' is already existing"
   fi
 
-  if [ -z "${vm_desc}" ]
+  if [ -z "${vm_hostname:-}" ]
+  then
+    __die "Value vm.hostname is not set in '${yaml_file}'"
+  fi
+
+  if [ -z "${vm_desc:-}" ]
   then
     __die "Value vm.desc is not set in '${yaml_file}'"
   fi
 
-  if [ -z "${vm_os}" ]
+  if [ -z "${vm_os:-}" ]
   then
     __die "Value vm.os is not set in '${yaml_file}'"
   fi
 
-  if [ -z "${vm_hardware_cpu}" ]
+  if [ -z "${vm_hardware_cpu:-}" ]
   then
     __die "Value vm.hardware.cpu is not set in '${yaml_file}'"
   fi
 
-  if [ -z "${vm_hardware_memory}" ]
+  if [ -z "${vm_hardware_memory:-}" ]
   then
     __die "Value vm.hardware.memory is not set in '${yaml_file}'"
   fi
@@ -111,16 +116,17 @@ function _virtadm_create() {
     fi
   fi
 
-  local additional_args=()
+  local virt_misc_args=()
 
-  local virt_cloud_init_arg=""
+  local virt_cloud_init_arg=()
   if [ -n "${cloudinit_image:-}" ]
   then
-    additional_args=("--import")
+    virt_misc_args+=("--import")
 
     export cloud_init_hostname="${vm_hostname%%.*}"
     export cloud_init_fqdn="${vm_hostname}"
-    export cloud_init_password="$(mkpasswd --method=SHA-512 "$(get-gopass.sh virtadm/defaultpw)")"
+    cloud_init_password="$(mkpasswd --method=SHA-512 "$(get-gopass.sh virtadm/defaultpw)")"
+    export cloud_init_password
     export cloud_init_ip4_address="${cloudinit_ip4_address:-}"
     export cloud_init_ip4_gateway="${cloudinit_ip4_gateway:-}"
     export cloud_init_nameservers="${cloudinit_nameservers:-}"
@@ -130,15 +136,16 @@ function _virtadm_create() {
     network="${SCRIPT_BASE}/cloud-init/${vm_name}/network.yaml"
     j2 "${SCRIPT_BASE}/cloud-init/user-data.j2" > "${user_data}"
     j2 "${SCRIPT_BASE}/cloud-init/network.j2" > "${network}"
-    #virt_cloud_init_arg="--cloud-init network-config=${network},user-data=${user_data}"
+    # create cloud-init.iso
+    local cloud_init_iso="${SCRIPT_BASE}/cloud-init/${vm_name}/cloud-init.iso"
     cloud-localds \
       --disk-format raw \
       --filesystem iso9660 \
       --network-config "${network}" \
-      "${SCRIPT_BASE}/cloud-init/${vm_name}/cloud-init.iso" \
+      "${cloud_init_iso}" \
       "${user_data}"
 
-    virt_cloud_init_arg="--disk path=${SCRIPT_BASE}/cloud-init/${vm_name}/cloud-init.iso,bus=virtio"
+    virt_cloud_init_arg+=("--disk" "path=${cloud_init_iso},bus=virtio")
   fi
 
   if [ ! -f "${vm_disk_image}" ]
@@ -146,6 +153,7 @@ function _virtadm_create() {
     __die "Image '${vm_disk_image}' is not readable"
   fi
 
+  virt_cdrom_arg=()
   if [ -n "${vm_cdrom:-}" ]
   then
     vm_cdrom="${SCRIPT_BASE}/iso/${vm_cdrom}"
@@ -153,22 +161,21 @@ function _virtadm_create() {
     then
       __die "Image '${vm_cdrom}' is not readable"
     fi
-    vm_cdrom="--cdrom ${vm_cdrom}"
+    virt_cdrom_arg+=("--cdrom" "${vm_cdrom}")
   else
-    vm_cdrom=""
-    additional_args+=("--boot" "hd")
+    virt_misc_args+=("--boot" "hd")
   fi
 
   if [[ "$vm_os" = win* ]]
   then
-    additional_args+=("--boot" "uefi")
+    virt_misc_args+=("--boot" "uefi")
     # TODO: read https://bugzilla.redhat.com/show_bug.cgi?id=1387479
-    #additional_args+=("--features" "kvm_hidden=on,smm=on")
-    #additional_args+=("--boot" "loader=/usr/share/OVMF/OVMF_CODE.secboot.fd,\
+    #virt_misc_args+=("--features" "kvm_hidden=on,smm=on")
+    #virt_misc_args+=("--boot" "loader=/usr/share/OVMF/OVMF_CODE.secboot.fd,\
     #                            loader_ro=yes,\
     #                            loader_type=pflash,\
     #                            nvram_template=/usr/share/OVMF/OVMF_VARS.ms.fd")
-    additional_args+=("--tpm" "backend.type=emulator,backend.version=2.0,model=tpm-tis")
+    virt_misc_args+=("--tpm" "backend.type=emulator,backend.version=2.0,model=tpm-tis")
 
     virt_graphics_arg=("--graphics" "spice" "--video" "virtio")
 
@@ -179,7 +186,7 @@ function _virtadm_create() {
     then
       curl -LO --output-dir "${SCRIPT_BASE}/iso" "${virtio_url}"
     fi
-    additional_args+=("--disk" "path=${SCRIPT_BASE}/iso/virtio-win.iso,device=cdrom")
+    virt_misc_args+=("--disk" "path=${SCRIPT_BASE}/iso/virtio-win.iso,device=cdrom")
 
     # check if Autounattend.xml should be provided
     if [ -n "${unattend_template:-}" ]
@@ -194,7 +201,8 @@ function _virtadm_create() {
       local unattend_iso="${SCRIPT_BASE}/unattend/${vm_name}.iso"
       # create Autounattend.xml from given template
       export unattend_hostname="${vm_hostname%%.*}"
-      export unattend_password="$(get-gopass.sh virtadm/defaultpw)"
+      unattend_password="$(get-gopass.sh virtadm/defaultpw)"
+      export unattend_password
       j2 "${unattend_template}" > "${unattend_dir}/Autounattend.xml"
       unset unattend_hostname
       unset unattend_password
@@ -203,15 +211,15 @@ function _virtadm_create() {
       mkisofs -o "${unattend_iso}" -input-charset utf-8 -J -r "${unattend_dir}" &> /dev/null
       rm -rf "${unattend_dir}"
       # add ISO to VM
-      additional_args+=("--disk" "path=${unattend_iso},device=cdrom")
+      virt_misc_args+=("--disk" "path=${unattend_iso},device=cdrom")
     fi
   else
     virt_graphics_arg=("--nographics")
   fi
 
   # add the access to guest-daemon
-  #additional_args+=("--channel" "unix,mode=bind,path=/var/lib/libvirt/qemu/${vm_name}.agent,target_type=virtio,name=org.qemu.guest_agent.0")
-  additional_args+=("--channel" "unix,mode=bind,path=${SCRIPT_BASE}/images/${vm_name}.agent,target_type=virtio,name=org.qemu.guest_agent.0")
+  #virt_misc_args+=("--channel" "unix,mode=bind,path=/var/lib/libvirt/qemu/${vm_name}.agent,target_type=virtio,name=org.qemu.guest_agent.0")
+  virt_misc_args+=("--channel" "unix,mode=bind,path=${SCRIPT_BASE}/images/${vm_name}.agent,target_type=virtio,name=org.qemu.guest_agent.0")
   # only working with --location
   # --console pty,target_type=serial \
   # --extra-args 'console=ttyS0,115200n8 serial' \
@@ -226,11 +234,11 @@ function _virtadm_create() {
     --vcpus="${vm_hardware_cpu}" \
     --network=default,model=virtio \
     --disk "path=${vm_disk_image},format=qcow2,device=disk,bus=${vm_disk_driver}" \
-    ${vm_cdrom} \
-    ${virt_cloud_init_arg} \
-    ${virt_console_arg} \
+    "${virt_cdrom_arg[@]}" \
+    "${virt_cloud_init_arg[@]}" \
+    "${virt_console_arg[@]}" \
     "${virt_graphics_arg[@]}" \
-    "${additional_args[@]}"
+    "${virt_misc_args[@]}"
 
   #  --disk path="${vm_disk_image/server/server-cloudinit}",bus=${vm_disk_driver} \
   #  --disk path="${vm_disk_image/server.qcow2/server-cloudinit.iso}",device=cdrom \
