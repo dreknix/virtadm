@@ -33,10 +33,10 @@ function _virtadm_list() {
       if ! virsh domdisplay "${vm_name}" &> /dev/null
       then
         tput setaf 3
-        printf "%- 35s"  "no graphical display"
+        printf "%s"  "no graphical display"
         tput sgr0
       else
-        printf "%- 35s"  "$(virsh domdisplay "${vm_name}")"
+        printf "%s"  "$(virsh domdisplay "${vm_name}")"
       fi
     fi
     printf "\n"
