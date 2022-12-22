@@ -2,6 +2,9 @@
 
 cloudinit:
   image: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64-disk-kvm.img
+  templates:
+    config: ubuntu-config.j2
+    network: ubuntu-network.j2
 
 vm:
   name: ubuntu2204-server

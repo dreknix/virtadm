@@ -1,0 +1,9 @@
+#cloud-config
+hostname: {{ cloud_init_hostname }}
+fqdn: {{ cloud_init_fqdn }}
+
+chpasswd:
+  expire: false
+  list:
+    - debian:{{ cloud_init_password }}
+    - root:{{ cloud_init_password }}

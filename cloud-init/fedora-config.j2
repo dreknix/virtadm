@@ -1,0 +1,19 @@
+#cloud-config
+hostname: {{ cloud_init_hostname }}
+fqdn: {{ cloud_init_fqdn }}
+
+timezone: Europe/Berlin
+
+package_update: true
+package_upgrade: true
+
+disable_root: false
+ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILz5gpGRxeIkkebwivchsuR0ItwexfMHksju0t7QoKcF
+
+users:
+  - name: root
+ 
+chpasswd:
+  list:
+    - root:{{ cloud_init_password }}

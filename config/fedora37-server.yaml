@@ -1,0 +1,23 @@
+---
+
+cloudinit:
+  image: https://download.fedoraproject.org/pub/fedora/linux/releases/37/Cloud/x86_64/images/Fedora-Cloud-Base-37-1.7.x86_64.qcow2
+  templates:
+    config: fedora-config.j2
+    network: fedora-network.j2
+
+vm:
+  name: fedora37-server
+  hostname: fedora.example.org
+  desc: VM with Fedora 37 (cloud-init)
+
+  os: fedora35
+
+  hardware:
+    cpu: 2
+    memory: 4096
+
+  disk:
+    size: 50G
+
+...

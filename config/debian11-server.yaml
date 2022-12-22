@@ -1,0 +1,23 @@
+---
+
+cloudinit:
+  image: https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.qcow2
+  templates:
+    config: debian-config.j2
+    network: debian-network.j2
+
+vm:
+  name: debian11-server
+  hostname: debian.example.org
+  desc: VM with Debian 11 server (cloud-init)
+
+  os: debian11
+
+  hardware:
+    cpu: 2
+    memory: 4096
+
+  disk:
+    size: 50G
+
+...

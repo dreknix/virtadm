@@ -1,5 +1,5 @@
 *
 !.gitignore
 !README.md
-!user-data.j2
-!network.j2
+!*.j2
+!*.j2
