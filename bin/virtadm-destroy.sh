@@ -26,11 +26,17 @@ function _virtadm_destroy() {
     __die "VM '${virt_vm_name}' is not existent"
   fi
 
+  local undefine_args=()
+  if [[ "${virt_vm_os:-}" = win* ]]
+  then
+    undefine_args+=("--nvram")
+  fi
+
   echo -n "Delete ${virt_vm_name}: "
   virsh shutdown "${virt_vm_name}" &> /dev/null || true
   sleep 1
   virsh destroy "${virt_vm_name}" &> /dev/null || true
-  virsh undefine "${virt_vm_name}" &> /dev/null
+  virsh undefine "${undefine_args[@]}" "${virt_vm_name}" &> /dev/null
   rm -f "images/${virt_vm_name}.qcow2" &> /dev/null
   rm -rf "cloud-init/${virt_vm_name}/" &> /dev/null
   echo "done"

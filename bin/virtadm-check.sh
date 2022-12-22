@@ -41,6 +41,7 @@ function _virtadm_check() {
   __test "Check if 'libvirt-daemon' is installed" dpkg -s libvirt-daemon
   __test "Check if 'libvirt-clients' is installed" dpkg -s libvirt-clients
   __test "Check if 'virt-manager' is installed" dpkg -s virt-manager
+  __test "Check if 'ovmf' is installed" dpkg -s ovmf
   __test "Check if 'cloud-image-utils' is installed" dpkg -s cloud-image-utils
   __test "Check if 'j2cli' is installed" dpkg -s j2cli
 

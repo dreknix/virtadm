@@ -15,7 +15,6 @@ vm:
     memory: 4096
 
   disk:
-    size: 50
-    driver: virtio
+    size: 50G
 
 ...

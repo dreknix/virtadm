@@ -11,8 +11,7 @@ vm:
     memory: 4096
 
   disk:
-    size: 50
-    driver: virtio
+    size: 50G
 
   # cdrom: Fedora-Workstation-Live-x86_64-37-1.7.iso
   cdrom: Fedora-Server-dvd-x86_64-37-1.7.iso

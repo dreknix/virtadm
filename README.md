@@ -6,7 +6,31 @@ Bash scripts for QEMU/KVM-based virtual machines.
 
 Existing VNC clients: vinagre, remmina
 
-## Cloud-Init
+## Windows Guests
+
+For testing Windows guest installations and the usage of `Autounattend.xml` use
+[generic product keys[(
+ https://learn.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys)
+from Microsoft.
+
+### Windows 11
+
+[Download](https://www.microsoft.com/software-download/windows11) an ISO image
+from Microsoft.
+
+When no network is found (second boot) press <Shift> + <F10> to open a command
+prompt. Then enter `OOBE\BYPASSNRO` and press <Enter>. The VM restarts
+automatically and the out-of-box experience (OOBE) will start again. Now you can
+select 'I don't have Internet' and 'Continue with limited setup'.
+
+### Autounattend.xml
+
+* [Sample: Configure UEFI/GPT-Based Hard Drive Partitions by Using Windows Setup](
+   https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/hh825702(v=win.10))
+
+## Linux Guests
+
+### Cloud-Init
 
 * [cloud-init documentation](https://cloudinit.readthedocs.io/en/latest/index.html)
   * [cloud-init: QEMU tutorial](

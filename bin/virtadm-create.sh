@@ -75,18 +75,15 @@ function _virtadm_create() {
     __die "Value vm.hardware.memory is not set in '${yaml_file}'"
   fi
 
+  # disk image
+  vm_disk_image="${SCRIPT_BASE}/images/${vm_name}.qcow2"
+  vm_disk_driver="${vm_disk_driver:-virtio}"
   if [ -z "${vm_disk_size}" ]
   then
     __die "Value vm.disk.size is not set in '${yaml_file}'"
   fi
 
-  if [ -z "${vm_disk_driver}" ]
-  then
-    __die "Value vm.disk.driver is not set in '${yaml_file}'"
-  fi
-
-  vm_disk_image="${SCRIPT_BASE}/images/${vm_name}.qcow2"
-  if [ -n "${cloudinit_image}" ] && [ ! -f "${vm_disk_image}" ]
+  if [ -n "${cloudinit_image:-}" ] && [ ! -f "${vm_disk_image}" ]
   then
     CI_IMAGE="${SCRIPT_BASE}/iso/${cloudinit_image##*/}"
     if [ ! -f "${CI_IMAGE}" ]
@@ -99,15 +96,28 @@ function _virtadm_create() {
     fi
     if ! qemu-img create \
       -b "${CI_IMAGE}" -F qcow2 -f qcow2 \
-      "${vm_disk_image}" "${vm_disk_size}"G &> /dev/null
+      "${vm_disk_image}" "${vm_disk_size}" &> /dev/null
     then
       __die "Creating disk image from cloud image failed"
     fi
   fi
 
-  local virt_cloud_init_arg=""
-  if [ -n "${cloudinit_image}" ]
+  if [ -z "${cloudinit_image:-}" ]
   then
+    if ! qemu-img create \
+      -f qcow2 "${vm_disk_image}" "${vm_disk_size}" &> /dev/null
+    then
+      __die "Creating empty disk image failed"
+    fi
+  fi
+
+  local additional_args=()
+
+  local virt_cloud_init_arg=""
+  if [ -n "${cloudinit_image:-}" ]
+  then
+    additional_args=("--import")
+
     export cloud_init_hostname="${vm_hostname%%.*}"
     export cloud_init_fqdn="${vm_hostname}"
     export cloud_init_password="$(get-gopass.sh virtadm/defaultpw)"
@@ -136,7 +146,6 @@ function _virtadm_create() {
     __die "Image '${vm_disk_image}' is not readable"
   fi
 
-  additional_args=""
   if [ -n "${vm_cdrom}" ]
   then
     vm_cdrom="${SCRIPT_BASE}/iso/${vm_cdrom}"
@@ -144,12 +153,64 @@ function _virtadm_create() {
     then
       __die "Image '${vm_cdrom}' is not readable"
     fi
-    vm_cdrom="--location ${vm_cdrom}"
+    vm_cdrom="--cdrom ${vm_cdrom}"
   else
-    additional_args="--boot hd"
+    additional_args+=("--boot" "hd")
   fi
 
-  echo "vm_disk_image: $vm_disk_image"
+  if [[ "$vm_os" = win* ]]
+  then
+    additional_args+=("--boot" "uefi")
+    # TODO: read https://bugzilla.redhat.com/show_bug.cgi?id=1387479
+    #additional_args+=("--features" "kvm_hidden=on,smm=on")
+    #additional_args+=("--boot" "loader=/usr/share/OVMF/OVMF_CODE.secboot.fd,\
+    #                            loader_ro=yes,\
+    #                            loader_type=pflash,\
+    #                            nvram_template=/usr/share/OVMF/OVMF_VARS.ms.fd")
+    additional_args+=("--tpm" "backend.type=emulator,backend.version=2.0,model=tpm-tis")
+
+    virt_graphics_arg=("--graphics" "spice" "--video" "virtio")
+
+    # add driver disk
+    local virtio_url="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso"
+    local virtio_driver_iso="${SCRIPT_BASE}/iso/virtio-win.iso"
+    if [ ! -f "${virtio_driver_iso}" ]
+    then
+      curl -LO --output-dir "${SCRIPT_BASE}/iso" "${virtio_url}"
+    fi
+    additional_args+=("--disk" "path=${SCRIPT_BASE}/iso/virtio-win.iso,device=cdrom")
+
+    # check if Autounattend.xml should be provided
+    if [ -n "${unattend_template:-}" ]
+    then
+      unattend_template="${SCRIPT_BASE}/unattend/${unattend_template}"
+      if [ ! -r "${unattend_template}" ]
+      then
+        __die "Unattend template '${unattend_template}' is missing"
+      fi
+      local unattend_dir="${SCRIPT_BASE}/unattend/${vm_name}/"
+      mkdir "${unattend_dir}"
+      local unattend_iso="${SCRIPT_BASE}/unattend/${vm_name}.iso"
+      # create Autounattend.xml from given template
+      export unattend_hostname="${vm_hostname%%.*}"
+      export unattend_password="$(get-gopass.sh virtadm/defaultpw)"
+      j2 "${unattend_template}" > "${unattend_dir}/Autounattend.xml"
+      unset unattend_hostname
+      unset unattend_password
+      # create ISO - remove if already existing
+      rm -f "${unattend_iso}"
+      mkisofs -o "${unattend_iso}" -input-charset utf-8 -J -r "${unattend_dir}"
+      rm -rf "${unattend_dir}"
+      # add ISO to VM
+      additional_args+=("--disk" "path=${unattend_iso},device=cdrom")
+    fi
+  else
+    virt_graphics_arg=("--nographics")
+  fi
+
+  # add the access to guest-daemon
+  #additional_args+=("--channel" "unix,mode=bind,path=/var/lib/libvirt/qemu/${vm_name}.agent,target_type=virtio,name=org.qemu.guest_agent.0")
+  additional_args+=("--channel" "unix,mode=bind,path=${SCRIPT_BASE}/images/${vm_name}.agent,target_type=virtio,name=org.qemu.guest_agent.0")
   # only working with --location
   # --console pty,target_type=serial \
   # --extra-args 'console=ttyS0,115200n8 serial' \
@@ -160,16 +221,15 @@ function _virtadm_create() {
     -n "${vm_name}" \
     --description "${vm_desc}" \
     --osinfo="${vm_os}" \
-    --ram=${vm_hardware_memory} \
-    --vcpus=${vm_hardware_cpu} \
-    --disk path="${vm_disk_image}",bus=${vm_disk_driver},size=${vm_disk_size} \
+    --ram="${vm_hardware_memory}" \
+    --vcpus="${vm_hardware_cpu}" \
+    --network=default,model=virtio \
+    --disk "path=${vm_disk_image},format=qcow2,device=disk,bus=${vm_disk_driver}" \
     ${vm_cdrom} \
     ${virt_cloud_init_arg} \
-    --network=default,model=virtio \
-    --import \
-    --nographics \
-    ${additional_args} \
-    ${virt_console_arg}
+    ${virt_console_arg} \
+    "${virt_graphics_arg[@]}" \
+    "${additional_args[@]}"
 
   #  --disk path="${vm_disk_image/server/server-cloudinit}",bus=${vm_disk_driver} \
   #  --disk path="${vm_disk_image/server.qcow2/server-cloudinit.iso}",device=cdrom \

@@ -3,9 +3,13 @@ hostname: {{ cloud_init_hostname }}
 fqdn: {{ cloud_init_fqdn }}
 manage_etc_hosts: true
 
-#package_upgrade: true
-
 timezone: Europe/Berlin
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - qemu-guest-agent
 
 ssh_import_id:
   - lp:dreknix

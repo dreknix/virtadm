@@ -1,0 +1,32 @@
+---
+
+# Use generic product keys from
+# https://learn.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys
+#
+# When no network is found (second boot) press <Shift> + <F10> to open a
+# command prompt. Then enter `OOBE\BYPASSNRO` and press <Enter>. The computer
+# restart automatically and the out-of-box experience (OOBE) will start again.
+# Now you can select 'I don't have Internet' and 'Continue with limited setup'.
+
+unattend:
+  template: unattend.j2
+
+vm:
+  name: windows11
+  hostname: w11.example.org
+  desc: VM with Windows 11
+
+  # get more infos: `osinfo-query os`
+  os: win10
+
+  hardware:
+    cpu: 2
+    memory: 4096
+
+  disk:
+    # disk size must be larger than 60GB
+    size: 70G
+
+  cdrom: Win11_22H2_English_x64v1.iso
+
+...
