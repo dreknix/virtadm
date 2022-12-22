@@ -26,6 +26,4 @@ system_info:
     name: root
 
 runcmd:
-  - hostname -A
-  - cat /etc/hosts
-  - ip a l
+  - systemctl start qemu-guest-agent
