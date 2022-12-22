@@ -44,6 +44,8 @@ function _virtadm_check() {
   __test "Check if 'ovmf' is installed" dpkg -s ovmf
   __test "Check if 'cloud-image-utils' is installed" dpkg -s cloud-image-utils
   __test "Check if 'j2cli' is installed" dpkg -s j2cli
+  __test "Check if 'genisoimage' is installed" dpkg -s genisoimage
+  __test "Check if 'whois' is installed" dpkg -s whois
 
   # Check if programs are available
   __test "Command 'virsh' is in path" command -v virsh
@@ -53,6 +55,8 @@ function _virtadm_check() {
   __test "Command 'cloud-localds' is in path" command -v cloud-localds
   __test "Command 'curl' is in path" command -v curl
   __test "Command 'j2' is in path" command -v j2
+  __test "Command 'mkpasswd' is in path" command -v mkpasswd
+  __test "Command 'mkisofs' is in path" command -v mkisofs
 
   # Check if kernel modules are loaded
   __test "Check if kernel modules are loaded" grep -sq kvm /proc/modules

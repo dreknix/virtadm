@@ -112,7 +112,7 @@ esac
 # check if programs are in PATH and user has permissions
 if [ "${subcommand}" != "help" ] && [ "${subcommand}" != "check" ]
 then
-  for __command in virsh qemu-img kvm virt-install cloud-localds curl j2
+  for __command in virsh qemu-img kvm virt-install cloud-localds curl j2 mkpasswd mkisofs
   do
     if ! command -v ${__command} &> /dev/null
     then
