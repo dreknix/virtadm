@@ -1,9 +1,12 @@
 #cloud-config
 hostname: {{ cloud_init_hostname }}
 fqdn: {{ cloud_init_fqdn }}
-
+ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILz5gpGRxeIkkebwivchsuR0ItwexfMHksju0t7QoKcF dreknix
 chpasswd:
   expire: false
-  list:
-    - debian:{{ cloud_init_password }}
-    - root:{{ cloud_init_password }}
+  users:
+    - name: debian
+      password: {{ cloud_init_password }}
+    - name: root
+      password: {{ cloud_init_password }}

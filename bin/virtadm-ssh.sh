@@ -38,7 +38,7 @@ function _virtadm_ssh() {
 
   ssh -o UserKnownHostsFile=/dev/null \
       -o StrictHostKeyChecking=no \
-      -l root -i ~/.ssh/id_dreknix \
+      -l debian -i ~/.ssh/id_dreknix \
       "${ip_address}"
 
 }
