@@ -20,13 +20,13 @@ vm:
   os: win10
 
   hardware:
-    cpu: 2
-    memory: 4096
+    cpu: 4
+    memory: 8192
 
   disk:
     # disk size must be larger than 60GB
     size: 70G
 
-  cdrom: Win11_22H2_English_x64v1.iso
+  cdrom: Win11_22H2_English_x64v2.iso
 
 ...
