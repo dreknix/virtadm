@@ -200,9 +200,9 @@ function _virtadm_create() {
       then
         __die "Unattend template '${unattend_template}' is missing"
       fi
-      local unattend_dir="${SCRIPT_BASE}/unattend/${vm_name}/"
+      local unattend_dir="${SCRIPT_BASE}/unattend/temp_${vm_name}/"
       mkdir "${unattend_dir}"
-      local unattend_iso="${SCRIPT_BASE}/unattend/${vm_name}.iso"
+      local unattend_iso="${SCRIPT_BASE}/unattend/vm_${vm_name}_unattend.iso"
       # create Autounattend.xml from given template
       export unattend_hostname="${vm_hostname%%.*}"
       unattend_password="$(get-gopass.sh virtadm/defaultpw)"

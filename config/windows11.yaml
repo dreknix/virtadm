@@ -9,7 +9,7 @@
 # Now you can select 'I don't have Internet' and 'Continue with limited setup'.
 
 unattend:
-  template: unattend.j2
+  template: unattend_win11.j2
 
 vm:
   name: windows11
