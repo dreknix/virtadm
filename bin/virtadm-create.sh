@@ -207,9 +207,40 @@ function _virtadm_create() {
       export unattend_hostname="${vm_hostname%%.*}"
       unattend_password="$(get-gopass.sh virtadm/defaultpw)"
       export unattend_password
+      # setup_tools_smb_path
+      if [ -n "${SETUP_SMB_PATH:-}" ]
+      then
+        setup_tools_smb_path="${SETUP_SMB_PATH}"
+      else
+        setup_tools_smb_path='\\localhost\setup'
+      fi
+      export setup_tools_smb_path
+      # setup_tools_smb_user
+      if [ -n "${SETUP_SMB_USER:-}" ]
+      then
+        setup_tools_smb_user="${SETUP_SMB_USER}"
+      else
+        setup_tools_smb_user='dreknix'
+      fi
+      export setup_tools_smb_user
+      # setup_tools_smb_password
+      setup_tools_smb_password="$(get-gopass.sh "virtadm/smb/${SETUP_SMB_USER}")"
+      export setup_tools_smb_password
+      # setup_tools_smb_script
+      if [ -n "${SETUP_SMB_SCRIPT:-}" ]
+      then
+        setup_tools_smb_script="${SETUP_SMB_SCRIPT}"
+      else
+        setup_tools_smb_script='Z:\setup\windows\setup.ps1'
+      fi
+      export setup_tools_smb_script
       j2 "${unattend_template}" > "${unattend_dir}/Autounattend.xml"
       unset unattend_hostname
       unset unattend_password
+      unset setup_tools_smb_path
+      unset setup_tools_smb_user
+      unset setup_tools_smb_password
+      unset setup_tools_smb_script
       # create ISO - remove if already existing
       rm -f "${unattend_iso}"
       mkisofs -o "${unattend_iso}" -input-charset utf-8 -J -r "${unattend_dir}" &> /dev/null
