@@ -1,8 +1,4 @@
 ---
-
-# Use generic product keys from
-# https://learn.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys
-#
 # When no network is found (second boot) press <Shift> + <F10> to open a
 # command prompt. Then enter `OOBE\BYPASSNRO` and press <Enter>. The computer
 # restart automatically and the out-of-box experience (OOBE) will start again.
@@ -10,6 +6,16 @@
 
 unattend:
   template: unattend_win11.j2
+  windows_version: Windows 11 Pro
+  # Use generic product keys from
+  # https://learn.microsoft.com/en-us/windows-server/get-started/kms-client-activation-keys
+  product_key: W269N-WFGWX-YVC9B-4J6C9-T83GX
+  input: 0409:00000407
+  language: en-US
+  locale: en-DE
+  timezone: W. Europe Standard Time
+  # wait after setup script on first boot
+  debug: true
 
 vm:
   name: windows11
@@ -17,7 +23,7 @@ vm:
   desc: VM with Windows 11
 
   # get more infos: `osinfo-query os`
-  os: win10
+  os: win11
 
   hardware:
     cpu: 4
@@ -28,5 +34,4 @@ vm:
     size: 70G
 
   cdrom: Win11_22H2_English_x64v2.iso
-
 ...

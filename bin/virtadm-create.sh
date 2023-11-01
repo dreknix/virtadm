@@ -207,6 +207,41 @@ function _virtadm_create() {
       export unattend_hostname="${vm_hostname%%.*}"
       unattend_password="$(get-gopass.sh virtadm/defaultpw)"
       export unattend_password
+      if [ -n "${unattend_product_key:-}" ]
+      then
+        export unattend_product_key
+      fi
+      if [ -z "${unattend_windows_version:-}" ]
+      then
+        unattend_windows_version="Windows 11 Pro"
+      fi
+      export unattend_windows_version
+      if [ -z "${unattend_input:-}" ]
+      then
+        unattend_input="0409:00000409"
+      fi
+      export unattend_input
+      if [ -z "${unattend_language:-}" ]
+      then
+        unattend_language="en-US"
+      fi
+      export unattend_language
+      if [ -z "${unattend_locale:-}" ]
+      then
+        unattend_locale="en-US"
+      fi
+      export unattend_locale
+      if [ -z "${unattend_timezone:-}" ]
+      then
+        unattend_timezone="Pacific Standard Time_dstoff"
+      fi
+      export unattend_timezone
+      if [ "${unattend_debug:-}"  = "true" ]
+      then
+        export unattend_noexit="-NoExit"
+      else
+        export unattend_noexit=""
+      fi
       # setup_tools_smb_path
       if [ -n "${SETUP_SMB_PATH:-}" ]
       then

@@ -12,12 +12,12 @@
 		</component>
     <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <SetupUILanguage>
-        <UILanguage>en-US</UILanguage>
+        <UILanguage>{{ unattend_language }}</UILanguage>
       </SetupUILanguage>
-      <InputLocale>0409:00000407</InputLocale>
-      <SystemLocale>en-DE</SystemLocale>
-      <UILanguage>en-US</UILanguage>
-      <UserLocale>en-DE</UserLocale>
+      <InputLocale>{{ unattend_input }}</InputLocale>
+      <SystemLocale>{{ unattend_locale }}</SystemLocale>
+      <UILanguage>{{ unattend_language }}</UILanguage>
+      <UserLocale>{{ unattend_locale }}</UserLocale>
     </component>
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <DiskConfiguration>
@@ -86,15 +86,17 @@
           <InstallFrom>
             <MetaData wcm:action="add">
               <Key>/IMAGE/NAME</Key>
-              <Value>Windows 11 Pro</Value>
+              <Value>{{ unattend_windows_version }}</Value>
             </MetaData>
           </InstallFrom>
         </OSImage>
       </ImageInstall>
       <UserData>
+{% if unattend_product_key is defined %}
         <ProductKey>
-          <Key>W269N-WFGWX-YVC9B-4J6C9-T83GX</Key>
+          <Key>{{ unattend_product_key }}</Key>
         </ProductKey>
+{% endif %}
         <AcceptEula>true</AcceptEula>
       </UserData>
     </component>
@@ -109,11 +111,11 @@
   </settings>
   <settings pass="oobeSystem">
     <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-      <InputLocale>0409:00000407</InputLocale>
-      <SystemLocale>en-DE</SystemLocale>
-      <UILanguage>en-US</UILanguage>
-      <UILanguageFallback>en-US</UILanguageFallback>
-      <UserLocale>en-DE</UserLocale>
+      <InputLocale>{{ unattend_input }}</InputLocale>
+      <SystemLocale>{{ unattend_locale }}</SystemLocale>
+      <UILanguage>{{ unattend_language }}</UILanguage>
+      <UILanguageFallback>{{ unattend_language }}</UILanguageFallback>
+      <UserLocale>{{ unattend_locale }}</UserLocale>
     </component>
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <OOBE>
@@ -163,28 +165,20 @@
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <CommandLine>net use z: {{ setup_tools_smb_path }} {{ setup_tools_smb_password }} /USER:{{ setup_tools_smb_user }} /PERSISTENT:no</CommandLine>
-          <Description>Start powershell</Description>
+          <Description>Map network storage with startup script</Description>
           <Order>20</Order>
           <RequiresUserInput>false</RequiresUserInput>
         </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -NoProfile -WindowStyle Maximized -ExecutionPolicy Bypass "{{ setup_tools_smb_script }}"</CommandLine>
-          <Description>Start powershell</Description>
-          <Order>21</Order>
+          <CommandLine>powershell {{ unattend_noexit }} -NoProfile -WindowStyle Maximized -ExecutionPolicy Bypass "{{ setup_tools_smb_script }}"</CommandLine>
+          <Description>Execute Powershell start up script</Description>
+          <Order>30</Order>
           <RequiresUserInput>false</RequiresUserInput>
         </SynchronousCommand>
-<!--
-        <SynchronousCommand wcm:action="add">
-          <CommandLine>powershell -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted</CommandLine>
-          <Description>Start powershell</Description>
-          <Order>98</Order>
-          <RequiresUserInput>false</RequiresUserInput>
-        </SynchronousCommand>
--->
         <SynchronousCommand wcm:action="add">
           <CommandLine>C:\Windows\System32\shutdown.exe /r /f /t 0</CommandLine>
           <Description>Reboot to complete setup</Description>
-          <Order>99</Order>
+          <Order>90</Order>
           <RequiresUserInput>false</RequiresUserInput>
         </SynchronousCommand>
       </FirstLogonCommands>
