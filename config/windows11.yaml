@@ -14,6 +14,8 @@ unattend:
   language: en-US
   locale: en-DE
   timezone: W. Europe Standard Time
+  # enable manual disk configuration
+  enable_disk_configuration: false
   # wait after setup script on first boot
   debug: true
 
@@ -33,5 +35,5 @@ vm:
     # disk size must be larger than 60GB
     size: 70G
 
-  cdrom: Win11_22H2_English_x64v2.iso
+  cdrom: Win11_23H2_English_x64.iso
 ...

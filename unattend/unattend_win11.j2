@@ -20,6 +20,7 @@
       <UserLocale>{{ unattend_locale }}</UserLocale>
     </component>
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+{% if unattend_enable_disk_configuration is not defined %}
       <DiskConfiguration>
         <Disk wcm:action="add">
           <DiskID>0</DiskID>
@@ -75,12 +76,15 @@
         </Disk>
         <WillShowUI>OnError</WillShowUI>
       </DiskConfiguration>
+{% endif %}
       <ImageInstall>
         <OSImage>
+{% if unattend_enable_disk_configuration is not defined %}
           <InstallTo>
             <DiskID>0</DiskID>
             <PartitionID>4</PartitionID>
           </InstallTo>
+{% endif %}
           <WillShowUI>OnError</WillShowUI>
           <InstallToAvailablePartition>false</InstallToAvailablePartition>
           <InstallFrom>

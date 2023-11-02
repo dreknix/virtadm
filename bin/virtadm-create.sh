@@ -236,6 +236,10 @@ function _virtadm_create() {
         unattend_timezone="Pacific Standard Time_dstoff"
       fi
       export unattend_timezone
+      if [ "${unattend_enable_disk_configuration:-}" = "true" ]
+      then
+        export unattend_enable_disk_configuration="true"
+      fi
       if [ "${unattend_debug:-}"  = "true" ]
       then
         export unattend_noexit="-NoExit"
