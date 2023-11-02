@@ -1,0 +1,8 @@
+*
+!.gitignore
+!debian11-server.yaml
+!debian12-server.yaml
+!fedora37-server.yaml
+!fedora37.yaml
+!ubuntu2204-server.yaml
+!windows11.yaml
