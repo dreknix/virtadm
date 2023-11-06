@@ -29,7 +29,7 @@
             <CreatePartition wcm:action="add">
               <Order>1</Order>
               <Type>Primary</Type>
-              <Size>300</Size>
+              <Size>500</Size>
             </CreatePartition>
             <CreatePartition wcm:action="add">
               <Order>2</Order>
@@ -123,15 +123,15 @@
     </component>
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <ProtectYourPC>3</ProtectYourPC>
         <VMModeOptimizations>
           <SkipAdministratorProfileRemoval>false</SkipAdministratorProfileRemoval>
         </VMModeOptimizations>
-        <HideLocalAccountScreen>true</HideLocalAccountScreen>
-        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
-        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
-        <ProtectYourPC>3</ProtectYourPC>
-        <HideEULAPage>true</HideEULAPage>
-        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
       </OOBE>
       <UserAccounts>
         <AdministratorPassword>
