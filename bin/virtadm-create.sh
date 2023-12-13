@@ -21,7 +21,8 @@ function _virtadm_create() {
   do
     case "$1" in
       --console)
-        virt_console_arg=()
+        #virt_console_arg=()
+        virt_console_arg=("--graphics" "vnc")
         shift
         ;;
 
@@ -168,9 +169,9 @@ function _virtadm_create() {
     virt_misc_args+=("--boot" "hd")
   fi
 
+  virt_misc_args+=("--boot" "uefi")
   if [[ "$vm_os" = win* ]]
   then
-    virt_misc_args+=("--boot" "uefi")
     # TODO: read https://bugzilla.redhat.com/show_bug.cgi?id=1387479
     #virt_misc_args+=("--features" "kvm_hidden=on,smm=on")
     #virt_misc_args+=("--boot" "loader=/usr/share/OVMF/OVMF_CODE.secboot.fd,\
@@ -288,7 +289,8 @@ function _virtadm_create() {
       virt_misc_args+=("--disk" "path=${unattend_iso},device=cdrom")
     fi
   else
-    virt_graphics_arg=("--nographics")
+    # TODO virt_graphics_arg=("--nographics")
+    virt_graphics_arg=()
   fi
 
   # add the access to guest-daemon
