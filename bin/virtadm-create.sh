@@ -311,7 +311,7 @@ function _virtadm_create() {
     --virt-type kvm \
     --features kvm_hidden=on,smm=on \
     --memory="${vm_hardware_memory}" \
-    --cpu Skylake-Client,-hle,-rtm \
+    --cpu Skylake-Client,-hle,-rtm,-pcid \
     --vcpus="${vm_hardware_cpu}" \
     --network=default,model=virtio \
     --disk "path=${vm_disk_image},format=qcow2,device=disk,bus=${vm_disk_driver}" \
