@@ -30,10 +30,10 @@ function _virtadm_check() {
   __test "Check if virtualization is enabled" grep -sq -E '(vmx|svm)' /proc/cpuinfo
 
   # Check if 'kvm-ok' is installed
-  __test "Check if 'kvm-ok' is installed" command -v kvm-ok
+  __test "Check if 'kvm-ok' is installed" command -v /usr/sbin/kvm-ok
 
   # Check if virtualization is available
-  __test "Check if virtualization is available" kvm-ok
+  __test "Check if virtualization is available" /usr/sbin/kvm-ok
 
   # Check if packages are installed
   # qemu qemu-kvm libvirt-daemon libvirt-clients bridge-utils virt-manager
